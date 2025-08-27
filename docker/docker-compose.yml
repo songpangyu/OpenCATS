@@ -8,12 +8,16 @@ services:
           - "443:443"
       volumes_from:
         - opencatsdata
+      volumes:
+        - ./nginx/upload.conf:/etc/nginx/sites-enabled/www.conf
 
     php:
       container_name: opencats_php
       image: opencats/php-base:7.2-fpm-alpine
       volumes_from:
         - opencatsdata
+      volumes:
+        - ./php/upload.ini:/usr/local/etc/php/conf.d/upload.ini
 
     opencatsdata:
       container_name: opencats_data
@@ -33,7 +37,7 @@ services:
         - MYSQL_PASSWORD=dev
         - MYSQL_DATABASE=cats
       volumes:
-        - ../test/data:/docker-entrypoint-initdb.d
+        # - ../test/data:/docker-entrypoint-initdb.d
         - ./persist/mysql:/var/lib/mysql
 
     phpmyadmin:

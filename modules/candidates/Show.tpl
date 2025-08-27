@@ -135,6 +135,15 @@ use OpenCATS\UI\CandidateDuplicateQuickActionMenu;
                             </tr>
 
                             <tr>
+                                <td class="vertical">LinkedIn URL:</td>
+                                <td class="data">
+                                    <?php if (!empty($this->data['linkedInUrl'])): ?>
+                                        <a href="<?php $this->_($this->data['linkedInUrl']); ?>" target="_blank"><?php $this->_($this->data['linkedInUrl']); ?></a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+
+                            <tr>
                                 <td class="vertical">Source:</td>
                                 <td class="data"><?php $this->_($this->data['source']); ?></td>
                             </tr>

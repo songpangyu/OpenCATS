@@ -111,6 +111,14 @@
                             <input type="text" class="inputbox" id="webSite" name="webSite" value="<?php $this->_($this->data['webSite']); ?>" style="width: 150px" />
                         </td>
                     </tr>
+                    <tr>
+                        <td class="tdVertical">
+                            <label id="linkedInUrlLabel" for="linkedInUrl">LinkedIn URL:</label>
+                        </td>
+                        <td class="tdData">
+                            <input type="text" class="inputbox" id="linkedInUrl" name="linkedInUrl" value="<?php $this->_($this->data['linkedInUrl']); ?>" style="width: 150px" />
+                        </td>
+                    </tr>
 
                     <tr>
                         <td class="tdVertical">

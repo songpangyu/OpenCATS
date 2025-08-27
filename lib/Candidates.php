@@ -96,7 +96,7 @@ class Candidates
         $source, $keySkills, $dateAvailable, $currentEmployer, $canRelocate,
         $currentPay, $desiredPay, $notes, $webSite, $bestTimeToCall, $enteredBy, $owner,
         $gender = '', $race = '', $veteran = '', $disability = '',
-        $skipHistory = false)
+        $linkedInUrl = '', $skipHistory = false)
     {
         $sql = sprintf(
             "INSERT INTO candidate (
@@ -121,6 +121,7 @@ class Candidates
                 desired_pay,
                 notes,
                 web_site,
+                linkedin_url,
                 best_time_to_call,
                 entered_by,
                 is_hot,
@@ -157,8 +158,8 @@ class Candidates
                 %s,
                 %s,
                 %s,
-                0,
                 %s,
+                0,
                 %s,
                 NOW(),
                 NOW(),
@@ -188,6 +189,7 @@ class Candidates
             $this->_db->makeQueryString($desiredPay),
             $this->_db->makeQueryString($notes),
             $this->_db->makeQueryString($webSite),
+            $this->_db->makeQueryString($linkedInUrl),
             $this->_db->makeQueryString($bestTimeToCall),
             $this->_db->makeQueryInteger($enteredBy),
             $this->_db->makeQueryInteger($owner),
@@ -197,6 +199,81 @@ class Candidates
             $this->_db->makeQueryString($disability),
             $this->_db->makeQueryString($gender)
         );
+        
+        // 使用简化的SQL插入，因为原始的复杂SQL构建存在问题
+        // 这个方法确保LinkedIn URL字段正确保存，包括中文字符
+        $sql = sprintf(
+            "INSERT INTO candidate (
+                first_name,
+                middle_name,
+                last_name,
+                email1,
+                email2,
+                phone_home,
+                phone_cell,
+                phone_work,
+                address,
+                city,
+                state,
+                zip,
+                source,
+                key_skills,
+                date_available,
+                current_employer,
+                can_relocate,
+                current_pay,
+                desired_pay,
+                notes,
+                web_site,
+                linkedin_url,
+                best_time_to_call,
+                entered_by,
+                is_hot,
+                owner,
+                site_id,
+                date_created,
+                date_modified,
+                eeo_ethnic_type_id,
+                eeo_veteran_type_id,
+                eeo_disability_status,
+                eeo_gender
+            )
+            VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s, %s, %s, %s
+            )",
+            $this->_db->makeQueryString($firstName),
+            $this->_db->makeQueryString($middleName),
+            $this->_db->makeQueryString($lastName),
+            $this->_db->makeQueryString($email1),
+            $this->_db->makeQueryString($email2),
+            $this->_db->makeQueryString($phoneHome),
+            $this->_db->makeQueryString($phoneCell),
+            $this->_db->makeQueryString($phoneWork),
+            $this->_db->makeQueryString($address),
+            $this->_db->makeQueryString($city),
+            $this->_db->makeQueryString($state),
+            $this->_db->makeQueryString($zip),
+            $this->_db->makeQueryString($source),
+            $this->_db->makeQueryString($keySkills),
+            $this->_db->makeQueryStringOrNULL($dateAvailable),
+            $this->_db->makeQueryString($currentEmployer),
+            ($canRelocate ? '1' : '0'),
+            $this->_db->makeQueryString($currentPay),
+            $this->_db->makeQueryString($desiredPay),
+            $this->_db->makeQueryString($notes),
+            $this->_db->makeQueryString($webSite),
+            $this->_db->makeQueryString($linkedInUrl),
+            $this->_db->makeQueryString($bestTimeToCall),
+            $this->_db->makeQueryInteger($enteredBy),
+            0, // is_hot
+            $this->_db->makeQueryInteger($owner),
+            $this->_siteID,
+            $this->_db->makeQueryInteger($race),
+            $this->_db->makeQueryInteger($veteran),
+            $this->_db->makeQueryString($disability),
+            $this->_db->makeQueryString($gender)
+        );
+        
         $queryResult = $this->_db->query($sql);
         if (!$queryResult)
         {
@@ -251,7 +328,7 @@ class Candidates
         $city, $state, $zip, $source, $keySkills, $dateAvailable,
         $currentEmployer, $canRelocate, $currentPay, $desiredPay,
         $notes, $webSite, $bestTimeToCall, $owner, $isHot, $email, $emailAddress,
-        $gender = '', $race = '', $veteran = '', $disability = '')
+        $gender = '', $race = '', $veteran = '', $disability = '', $linkedInUrl = '')
     {
         $sql = sprintf(
             "UPDATE
@@ -280,6 +357,7 @@ class Candidates
                 is_hot                = %s,
                 notes                 = %s,
                 web_site              = %s,
+                linkedin_url          = %s,
                 best_time_to_call     = %s,
                 owner                 = %s,
                 date_modified         = NOW(),
@@ -314,6 +392,7 @@ class Candidates
             ($isHot ? '1' : '0'),
             $this->_db->makeQueryString($notes),
             $this->_db->makeQueryString($webSite),
+            $this->_db->makeQueryString($linkedInUrl),
             $this->_db->makeQueryString($bestTimeToCall),
             $this->_db->makeQueryInteger($owner),
             $this->_db->makeQueryInteger($race),
@@ -482,6 +561,7 @@ class Candidates
                 candidate.owner AS owner,
                 candidate.can_relocate AS canRelocate,
                 candidate.web_site AS webSite,
+                candidate.linkedin_url AS linkedInUrl,
                 candidate.best_time_to_call AS bestTimeToCall,
                 candidate.is_hot AS isHot,
                 candidate.is_admin_hidden AS isAdminHidden,
@@ -618,6 +698,7 @@ class Candidates
                 candidate.owner AS owner,
                 candidate.can_relocate AS canRelocate,
                 candidate.web_site AS webSite,
+                candidate.linkedin_url AS linkedInUrl,
                 candidate.best_time_to_call AS bestTimeToCall,
                 candidate.is_hot AS isHot,
                 candidate.eeo_ethnic_type_id AS eeoEthnicTypeID,

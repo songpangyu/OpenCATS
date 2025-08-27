@@ -184,6 +184,15 @@
 
                     <tr>
                         <td class="tdVertical">
+                            <label id="linkedInUrlLabel" for="linkedInUrl">LinkedIn URL:</label>
+                        </td>
+                        <td class="tdData">
+                            <input type="text" tabindex="5.5" name="linkedInUrl" id="linkedInUrl" class="inputbox" style="width: 150px" value="<?php if (isset($this->preassignedFields['linkedInUrl'])) $this->_($this->preassignedFields['linkedInUrl']); ?>" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="tdVertical">
                             <label id="phoneHomeLabel" for="phoneHome">Home Phone:</label>
                         </td>
                         <td class="tdData">

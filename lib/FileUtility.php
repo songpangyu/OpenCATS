@@ -564,9 +564,16 @@ class FileUtility
     {
         if (isset($_FILES[$id]))
         {
-            if (!@file_exists($_FILES[$id]['tmp_name']))
+            if (!file_exists($_FILES[$id]['tmp_name']))
             {
                 // File was removed, accessed from another window, or no longer exists
+                error_log("OpenCATS Upload Error: Temporary file not found: " . $_FILES[$id]['tmp_name']);
+                return false;
+            }
+
+            // Check for upload errors
+            if ($_FILES[$id]['error'] !== UPLOAD_ERR_OK) {
+                error_log("OpenCATS Upload Error: " . self::getErrorMessage($_FILES[$id]['error']));
                 return false;
             }
 

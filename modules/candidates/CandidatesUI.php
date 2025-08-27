@@ -1326,6 +1326,7 @@ class CandidatesUI extends UserInterface
         $desiredPay      = $this->getSanitisedInput('desiredPay', $_POST);
         $notes           = $this->getSanitisedInput('notes', $_POST);
         $webSite         = $this->getSanitisedInput('webSite', $_POST);
+        $linkedInUrl     = $this->getTrimmedInput('linkedInUrl', $_POST);
         $bestTimeToCall  = $this->getTrimmedInput('bestTimeToCall', $_POST);
         $gender          = $this->getTrimmedInput('gender', $_POST);
         $race            = $this->getTrimmedInput('race', $_POST);
@@ -1376,7 +1377,8 @@ class CandidatesUI extends UserInterface
             $gender,
             $race,
             $veteran,
-            $disability
+            $disability,
+            $linkedInUrl
         );
         if (!$updateSuccess)
         {
@@ -2600,6 +2602,7 @@ class CandidatesUI extends UserInterface
         $desiredPay      = $this->getTrimmedInput('desiredPay', $_POST);
         $notes           = $this->getTrimmedInput('notes', $_POST);
         $webSite         = $this->getTrimmedInput('webSite', $_POST);
+        $linkedInUrl     = $this->getTrimmedInput('linkedInUrl', $_POST);
         $bestTimeToCall  = $this->getTrimmedInput('bestTimeToCall', $_POST);
         $gender          = $this->getTrimmedInput('gender', $_POST);
         $race            = $this->getTrimmedInput('race', $_POST);
@@ -2656,7 +2659,8 @@ class CandidatesUI extends UserInterface
             $gender,
             $race,
             $veteran,
-            $disability
+            $disability,
+            $linkedInUrl
         );
 
         

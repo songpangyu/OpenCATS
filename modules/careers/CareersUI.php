@@ -351,7 +351,7 @@ class CareersUI extends UserInterface
             {
                 $storedVal .= sprintf('"%s"="%s"', urlencode($tag), urlencode($tagData));
             }
-            @setcookie($this->getCareerPortalCookieName($siteID), $storedVal, time()+60*60*24*7*2);
+            // @setcookie($this->getCareerPortalCookieName($siteID), $storedVal, time()+60*60*24*7*2);
 
             $template['Content'] = '<div id="careerContent"><br /><br /><h1>Please wait while you are redirected to your updated profile...</h1></div>';
             CATSUtility::transferRelativeURI('m=careers&p=showAll&pa=updateProfile&isPostBack=yes');
@@ -428,6 +428,7 @@ class CareersUI extends UserInterface
             $keySkills = isset($_POST[$id='keySkills']) ? $_POST[$id] : '';
             $source = isset($_POST[$id='source']) ? $_POST[$id] : '';
             $employer = isset($_POST[$id='employer']) ? $_POST[$id] : '';
+            $linkedInUrl = isset($_POST[$id='linkedInUrl']) ? $_POST[$id] : '';
             // for <input-resumeUploadPreview>
             $resumeContents = isset($_POST[$id='resumeContents']) ? $_POST[$id] : '';
             $resumeFileLocation = isset($_POST[$id='file']) ? $_POST[$id] : '';
@@ -456,6 +457,7 @@ class CareersUI extends UserInterface
                     $keySkills = $candidate['keySkills'];
                     $source = $candidate['source'];
                     $employer = $candidate['currentEmployer'];
+                    $linkedInUrl = $candidate['linkedInUrl'];
                     $candidateID = $candidate['candidateID'];
                 }
             }
@@ -490,6 +492,7 @@ class CareersUI extends UserInterface
                         $keySkills = $candidate['keySkills'];
                         $source = $candidate['source'];
                         $employer = $candidate['currentEmployer'];
+                        $linkedInUrl = $candidate['linkedInUrl'];
                         $candidateID = $candidate['candidateID'];
                     }
                 }
@@ -595,6 +598,7 @@ class CareersUI extends UserInterface
             $template['Content'] = str_replace('<input-keySkills>', '<input name="keySkills" id="keySkills" class="inputBoxNormal" value="' . $keySkills . '" />', $template['Content']);
             $template['Content'] = str_replace('<input-source>', '<input name="source" id="source" class="inputBoxNormal" value="' . $source . '" />', $template['Content']);
             $template['Content'] = str_replace('<input-employer>', '<input name="employer" id="employer" class="inputBoxNormal" value="' . $employer . '" />', $template['Content']);
+            $template['Content'] = str_replace('<input-linkedInUrl>', '<input name="linkedInUrl" id="linkedInUrl" class="inputBoxNormal" value="' . $linkedInUrl . '" autocomplete="off" onkeypress="if(event.keyCode==13) return false;" />', $template['Content']);
             $template['Content'] = str_replace('<input-resumeUpload>', '<input type="file" id="resume" name="file" class="inputBoxFile" />', $template['Content']);
             $template['Content'] = str_replace('<input-resumeUploadPreview>',
                 '<input type="hidden" id="applyToJobSubAction" name="applyToJobSubAction" value="" /> '
@@ -747,7 +751,7 @@ class CareersUI extends UserInterface
             if ((isset($_GET[$id='questionnairePostBack']) && $_GET[$id] == '1') || !$questionnaireID)
             {
                 // Continue on our merry way
-                $this->onApplyToJobOrder($siteID, $candidateID);
+                $applicationResult = $this->onApplyToJobOrder($siteID, $candidateID);
 
                 $jobOrderData = $jobOrders->get($jobID);
                 if (!isset($jobOrderData['public']) || $jobOrderData['public'] == 0)
@@ -760,6 +764,24 @@ class CareersUI extends UserInterface
                 $template['Content'] = $template['Content - Thanks for your Submission'];
                 $template['Content'] = str_replace('<title>', $jobOrderData['title'], $template['Content']);
                 $template['Content'] = str_replace('<a-jobDetails>', '<a href="' . CATSUtility::getIndexName() . '?m=careers'.(isset($_GET['templateName']) ? '&templateName='.urlencode($_GET['templateName']) : '').'&p=showJob&ID='.$_POST['ID'].'">', $template['Content']);
+                
+                // Add file upload warning if there was an error
+                if (isset($uploadError) && !$fileUploaded) {
+                    $warningMessage = '<div style="background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; margin: 20px 0; border-radius: 5px;">' .
+                                    '<strong>Warning:</strong> Your application was submitted successfully, but there was an issue uploading your resume file. ' .
+                                    'Please contact us directly to submit your resume, or try applying again with a different file format (PDF, DOC, or TXT).' .
+                                    '</div>';
+                    $template['Content'] = $warningMessage . $template['Content'];
+                }
+                
+                // Add returning candidate notice to page
+                if (isset($applicationResult['isReturning']) && $applicationResult['isReturning']) {
+                    $returningMessage = '<div style="background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; margin: 20px 0; border-radius: 5px;">' .
+                                      '<strong>Profile Updated:</strong> We found an existing application with this email address. ' .
+                                      'Your profile information has been updated with the details you provided in this application.' .
+                                      '</div>';
+                    $template['Content'] = $returningMessage . $template['Content'];
+                }
             }
             else
             {
@@ -1225,6 +1247,12 @@ class CareersUI extends UserInterface
         $keySkills      = $this->getSanitisedInput('keySkills', $_POST);
         $extraNotes     = $this->getSanitisedInput('extraNotes', $_POST);
         $employer       = $this->getSanitisedInput('employer', $_POST);
+        $linkedInUrl    = isset($_POST['linkedInUrl']) ? trim($_POST['linkedInUrl']) : '';
+        
+        // 解码LinkedIn URL中的中文字符
+        if (!empty($linkedInUrl)) {
+            $linkedInUrl = urldecode($linkedInUrl);
+        }
 
         $gender         = $this->getSanitisedInput('eeogender', $_POST);
         $race           = $this->getSanitisedInput('eeorace', $_POST);
@@ -1253,6 +1281,7 @@ class CareersUI extends UserInterface
 
         $users = new Users(CATS_ADMIN_SITE);
         $automatedUser = $users->getAutomatedUser();
+        
 
         /* Find if another user with same e-mail exists. If so, update the user
          * to contain the new information.
@@ -1264,7 +1293,7 @@ class CareersUI extends UserInterface
          * process repeated postings, etc.
          */
         $fields = array('firstName', 'lastName', 'email', 'address', 'city', 'state', 'zip', 'phone',
-            'phoneHome', 'phoneCell'
+            'phoneHome', 'phoneCell', 'linkedInUrl'
         );
         $storedVal = '';
         foreach ($fields as $field)
@@ -1272,22 +1301,29 @@ class CareersUI extends UserInterface
             eval('$tmp = sprintf(\'"%s"="%s"\', $field, urlencode($' . $field . '));');
             $storedVal .= $tmp;
         }
+        // Cookie mechanism disabled to prevent user data conflicts
         // Store their information for an hour only (about 1 session), if they return they can log in again and
         // specify "remember me" which stores it for 2 weeks.
-        @setcookie($this->getCareerPortalCookieName($siteID), $storedVal, time()+60*60);
+        // @setcookie($this->getCareerPortalCookieName($siteID), $storedVal, time()+60*60);
 
         if ($candidateID !== false)
         {
             $candidate = $candidates->get($candidateID);
 
             // Candidate exists and registered. Update their profile with new values (if provided)
-            $candidates->update(
+            $updateResult = $candidates->update(
                 $candidateID, $candidate['isActive'] ? true : false, $firstName, $middleName,
                 $lastName, $email, $email2, $phoneHome, $phoneCell, $phone, $address, $city,
                 $state, $zip, $source, $keySkills, '', $employer, '', '', '', $candidate['notes'],
-                '', $bestTimeToCall, $automatedUser['userID'], $automatedUser['userID'], $gender,
-                $race, $veteran, $disability
+                '', $bestTimeToCall, $automatedUser['userID'], $automatedUser['userID'], $email,
+                $email, $gender, $race, $veteran, $disability, $linkedInUrl
             );
+            
+            // 检查更新是否成功
+            if ($updateResult === false) {
+                CommonErrors::fatal(COMMONERROR_RECORDERROR, $this, 'Failed to update candidate record.');
+                return;
+            }
 
             /* Update extra feilds */
             $candidates->extraFields->setValuesOnEdit($candidateID);
@@ -1298,9 +1334,13 @@ class CareersUI extends UserInterface
             $candidateID = $candidates->getIDByEmail($email);
         }
 
+        // Track if this is a returning candidate
+        $isReturningCandidate = ($candidateID !== false && $candidateID > 0);
+
         if ($candidateID === false || $candidateID < 0)
         {
             /* New candidate. */
+            
             $candidateID = $candidates->add(
                 $firstName,
                 $middleName,
@@ -1316,24 +1356,51 @@ class CareersUI extends UserInterface
                 $zip,
                 $source,
                 $keySkills,
-                '',
-                $employer,
-                '',
-                '',
-                '',
+                '',          // dateAvailable
+                $employer,   // currentEmployer
+                '',          // canRelocate
+                '',          // currentPay
+                '',          // desiredPay
                 'Candidate submitted these notes with first application: '
-                . "\n\n" . $extraNotes,
-                '',
+                . "\n\n" . $extraNotes, // notes
+                '',          // webSite
                 $bestTimeToCall,
-                $automatedUser['userID'],
-                $automatedUser['userID'],
+                intval($automatedUser['userID']), // enteredBy - 强制转换为整数
+                intval($automatedUser['userID']), // owner - 使用automatedUser作为owner
                 $gender,
                 $race,
                 $veteran,
-                $disability
+                $disability,
+                $linkedInUrl
             );
+            
+            // 检查候选人是否添加成功
+            if ($candidateID === false || $candidateID <= 0) {
+                CommonErrors::fatal(COMMONERROR_RECORDERROR, $this, 'Failed to create candidate record.');
+                return;
+            }
 
             /* Update extra fields. */
+            $candidates->extraFields->setValuesOnEdit($candidateID);
+        }
+        else if ($isReturningCandidate)
+        {
+            /* Returning candidate - update their information */
+            $candidate = $candidates->get($candidateID);
+            $updateResult = $candidates->update(
+                $candidateID, $candidate['isActive'] ? true : false, $firstName, $middleName,
+                $lastName, $email, $email2, $phoneHome, $phoneCell, $phone, $address, $city,
+                $state, $zip, $source, $keySkills, '', $employer, '', '', '', 
+                $candidate['notes'] . "\n\nCandidate updated profile on " . date('Y-m-d H:i:s') . ': ' . $extraNotes,
+                '', $bestTimeToCall, $automatedUser['userID'], $candidate['owner'], $email,
+                $email, $gender, $race, $veteran, $disability, $linkedInUrl
+            );
+            
+            // 检查更新是否成功
+            if ($updateResult === false) {
+                CommonErrors::fatal(COMMONERROR_RECORDERROR, $this, 'Failed to update returning candidate record.');
+                return;
+            }
             $candidates->extraFields->setValuesOnEdit($candidateID);
         }
 
@@ -1357,8 +1424,10 @@ class CareersUI extends UserInterface
 
             if ($attachmentCreator->isError())
             {
-                CommonErrors::fatal(COMMONERROR_FILEERROR, $this, $attachmentCreator->getError());
-                return;
+                error_log("OpenCATS Career Portal Upload Error: " . $attachmentCreator->getError());
+                $uploadError = $attachmentCreator->getError();
+                // Continue processing, but log the error and inform user
+                $fileUploaded = false;
             }
 
             $duplicatesOccurred = $attachmentCreator->duplicatesOccurred();
@@ -1387,8 +1456,10 @@ class CareersUI extends UserInterface
 
                 if ($attachmentCreator->isError())
                 {
-                    CommonErrors::fatal(COMMONERROR_FILEERROR, $this, $attachmentCreator->getError());
-                    return;
+                    error_log("OpenCATS Career Portal Upload Error (File): " . $attachmentCreator->getError());
+                    $uploadError = $attachmentCreator->getError();
+                    // Continue processing, but log the error and inform user
+                    $fileUploaded = false;
                 }
 
                 $duplicatesOccurred = $attachmentCreator->duplicatesOccurred();
@@ -1433,6 +1504,10 @@ class CareersUI extends UserInterface
         if (!$newApplication)
         {
             $activityNote = 'User re-applied through candidate portal';
+        }
+        else if ($isReturningCandidate)
+        {
+            $activityNote = 'Returning candidate updated profile and applied to new position through candidate portal';
         }
         else
         {
@@ -1512,6 +1587,16 @@ class CareersUI extends UserInterface
         );
 
         $emailContents = $candidatesEmailTemplate;
+
+        // Add returning candidate notice to email
+        if ($isReturningCandidate && !empty($emailContents))
+        {
+            $returnNotice = "\n\n--- NOTICE ---\n";
+            $returnNotice .= "We found an existing application with this email address. ";
+            $returnNotice .= "Your profile information has been updated with the details you provided in this application.\n";
+            $returnNotice .= "If you have any questions, please contact us.\n";
+            $emailContents .= $returnNotice;
+        }
 
         if (!empty($emailContents))
         {
@@ -1600,6 +1685,12 @@ class CareersUI extends UserInterface
                 );
             }
         }
+        
+        // Return application result information
+        return array(
+            'isReturning' => $isReturningCandidate,
+            'candidateID' => $candidateID
+        );
     }
 
     public function capturePostData($siteID, $ignore = array())
@@ -1725,7 +1816,7 @@ class CareersUI extends UserInterface
                 {
                     $storedVal .= sprintf('"%s"="%s"', urlencode($tag), urlencode($tagData));
                 }
-                @setcookie($this->getCareerPortalCookieName($siteID), $storedVal, time()+60*60*24*7*2);
+                // @setcookie($this->getCareerPortalCookieName($siteID), $storedVal, time()+60*60*24*7*2);
             }
 
             return $candidate;

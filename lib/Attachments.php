@@ -1243,14 +1243,17 @@ class AttachmentCreator
         else if ($fileExists)
         {
             /* Copy the temp file to the new path. */
-            if (!@copy($tempFilename, $newFileFullPath))
+            if (!copy($tempFilename, $newFileFullPath))
             {
                 $this->_isError = true;
+                $lastError = error_get_last();
                 $this->_error = sprintf(
-                    'Cannot copy temporary file %s to %s.',
+                    'Cannot copy temporary file %s to %s. Error: %s',
                     $tempFilename,
-                    $newFileFullPath
+                    $newFileFullPath,
+                    $lastError ? $lastError['message'] : 'Unknown error'
                 );
+                error_log("OpenCATS File Upload Error: " . $this->_error);
                 $attachments->delete($attachmentID, false);
                 @unlink($newFileFullPath);
                 @unlink($uniqueDirectory);

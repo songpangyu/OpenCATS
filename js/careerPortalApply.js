@@ -14,12 +14,69 @@ function resumeLoadCheck()
     var fileInput = document.getElementById('resumeFile');
     var parseButton = document.getElementById('resumePopulate');
     var resumeUpload = document.getElementById('resumeLoad');
-
-    resumeUpload.disabled = (fileInput.value).length ? false : true;
-    if (parseButton)
-    {
-        parseButton.disabled = (fileInput.value).length ? false : true;
+    var errorDiv = document.getElementById('fileUploadError');
+    
+    // Clear previous error
+    if (errorDiv) {
+        errorDiv.innerHTML = '';
+        errorDiv.style.display = 'none';
     }
+
+    if (fileInput.files && fileInput.files.length > 0) {
+        var file = fileInput.files[0];
+        var maxSize = 10 * 1024 * 1024; // 10MB in bytes
+        var allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+        
+        // Check file size
+        if (file.size > maxSize) {
+            showFileUploadError('File size too large. Maximum allowed size is 10MB.');
+            resumeUpload.disabled = true;
+            if (parseButton) parseButton.disabled = true;
+            return;
+        }
+        
+        // Check file type
+        if (allowedTypes.indexOf(file.type) === -1 && !isAllowedFileExtension(file.name)) {
+            showFileUploadError('Invalid file type. Please upload PDF, DOC, DOCX, or TXT files only.');
+            resumeUpload.disabled = true;
+            if (parseButton) parseButton.disabled = true;
+            return;
+        }
+        
+        resumeUpload.disabled = false;
+        if (parseButton) parseButton.disabled = false;
+    } else {
+        resumeUpload.disabled = true;
+        if (parseButton) parseButton.disabled = true;
+    }
+}
+
+function isAllowedFileExtension(filename) {
+    var allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
+    var extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+    return allowedExtensions.indexOf(extension) !== -1;
+}
+
+function showFileUploadError(message) {
+    var errorDiv = document.getElementById('fileUploadError');
+    if (!errorDiv) {
+        // Create error div if it doesn't exist
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'fileUploadError';
+        errorDiv.style.color = '#ff0000';
+        errorDiv.style.fontWeight = 'bold';
+        errorDiv.style.marginTop = '5px';
+        errorDiv.style.padding = '5px';
+        errorDiv.style.backgroundColor = '#ffe6e6';
+        errorDiv.style.border = '1px solid #ff9999';
+        
+        var fileInput = document.getElementById('resumeFile');
+        if (fileInput && fileInput.parentNode) {
+            fileInput.parentNode.insertBefore(errorDiv, fileInput.nextSibling);
+        }
+    }
+    errorDiv.innerHTML = message;
+    errorDiv.style.display = 'block';
 }
 
 /* Load the contents of the uploaded file into the textarea box */
