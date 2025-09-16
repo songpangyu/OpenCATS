@@ -604,7 +604,7 @@ class CareersUI extends UserInterface
                 '<input type="hidden" id="applyToJobSubAction" name="applyToJobSubAction" value="" /> '
                 . '<input type="hidden" id="file" name="file" value="' . $resumeFileLocation . '" /> '
                 . '<input type="file" id="resumeFile" name="resumeFile" class="inputBoxFile" size="30" onchange="resumeLoadCheck();" /> '
-                . '<input type="button" id="resumeLoad" name="resumeLoad" value="Upload" onclick="resumeLoadFile();" disabled /><br /> '
+                . '<input type="button" id="resumeLoad" name="resumeLoad" value="Upload" onclick="resumeLoadFile();" disabled style="display: none;" /><br /> '
                 . $attachmentHTML
                 . '<textarea id="resumeContents" name="resumeContents" class="inputBoxArea" onmousemove="resumeContentsChange(this);" '
                 . 'onchange="resumeContentsChange(this);" onmousedown="resumeContentsChange(this);" '
@@ -1123,6 +1123,38 @@ class CareersUI extends UserInterface
                     return false;
                 }';
         }
+
+        // Add LinkedIn URL validation
+        $validator .= '
+            // Validate LinkedIn URL if filled
+            var linkedInField = document.getElementById(\'linkedInUrl\');
+            if (linkedInField && linkedInField.value && linkedInField.value.trim().length > 0) {
+                var url = linkedInField.value.trim();
+                if (!url.match(/^https?:\/\//)) {
+                    alert(\'LinkedIn URL should start with "http://" or "https://". Please correct the format.\');
+                    linkedInField.focus();
+                    return false;
+                }
+                if (!url.toLowerCase().includes(\'linkedin.com\')) {
+                    alert(\'Please enter a valid LinkedIn URL (should contain "linkedin.com").\');
+                    linkedInField.focus();
+                    return false;
+                }
+            }
+            
+            // Validate resume upload
+            var resumeContents = document.getElementById(\'resumeContents\');
+            var fileInput = document.getElementById(\'resumeFile\');
+            
+            if (resumeContents && resumeContents.value && resumeContents.value.trim().length > 0) {
+                // Resume content exists, validation passed
+            } else if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                alert(\'Please click the Upload button to upload your selected resume file before submitting.\');
+                return false;
+            } else {
+                alert(\'Please upload a resume before submitting your application.\');
+                return false;
+            }';
 
         $validator = '<script type="text/javascript">function applyValidate() {'
             . $validator . ' return true; }' . "\n" . '</script>';

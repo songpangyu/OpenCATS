@@ -45,6 +45,13 @@ function resumeLoadCheck()
         
         resumeUpload.disabled = false;
         if (parseButton) parseButton.disabled = false;
+        
+        // Auto-upload after successful validation
+        setTimeout(function() {
+            if (resumeUpload && !resumeUpload.disabled) {
+                resumeLoadFile();
+            }
+        }, 500);
     } else {
         resumeUpload.disabled = true;
         if (parseButton) parseButton.disabled = true;
@@ -282,3 +289,4 @@ function validateCandidateRegistration()
 
     return true;
 }
+
