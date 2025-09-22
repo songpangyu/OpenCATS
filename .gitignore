@@ -13,3 +13,34 @@ uploads/*
 /vendor/
 *.diff
 *.rej
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package files
+package-lock.json
+
+# Test files and scripts
+check_candidates.js
+candidates_page.png
+test_country_column.js
+current_candidates_page.png
+server_candidates_page.png
+*_candidates_page.png
+
+# Upload scripts
+upload_with_expect.sh
+upload_missing_file.sh
+upload_files.sh
+*upload*.sh
+
+# Temporary diagnostic files
+diagnose_*.sh
+fix_*.sh
+clear_*.sh
+restart_*.sh
+check_server_*.sh
+check_server_*.js

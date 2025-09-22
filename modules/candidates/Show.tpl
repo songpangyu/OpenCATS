@@ -118,11 +118,31 @@ use OpenCATS\UI\CandidateDuplicateQuickActionMenu;
                             </tr>
 
                             <tr>
-                                <td class="vertical">&nbsp;</td>
-                                <td class="data">
-                                    <?php $this->_($this->data['cityAndState']); ?>
-                                    <?php $this->_($this->data['zip']); ?>
-                                </td>
+                                <td class="vertical">City:</td>
+                                <td class="data"><?php $this->_($this->data['city']); ?></td>
+                            </tr>
+
+                            <tr>
+                                <td class="vertical">Country:</td>
+                                <td class="data"><?php
+                                    $countryNames = array('USA' => 'United States', 'CAN' => 'Canada', 'MEX' => 'Mexico');
+                                    $countryCode = $this->data['country'];
+                                    if (isset($countryNames[$countryCode])) {
+                                        $this->_($countryNames[$countryCode]);
+                                    } else {
+                                        $this->_($countryCode);
+                                    }
+                                ?></td>
+                            </tr>
+
+                            <tr>
+                                <td class="vertical">State/Prov:</td>
+                                <td class="data"><?php $this->_($this->data['state']); ?></td>
+                            </tr>
+
+                            <tr>
+                                <td class="vertical">Postal Code:</td>
+                                <td class="data"><?php $this->_($this->data['zip']); ?></td>
                             </tr>
 
                             <tr>

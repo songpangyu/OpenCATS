@@ -506,6 +506,23 @@ class CandidatesUI extends UserInterface
             $data['city'], $data['state']
         );
 
+        /* Format country code to full country name */
+        if (!empty($data['country'])) {
+            switch (strtoupper($data['country'])) {
+                case 'USA':
+                case 'US':
+                    $data['country'] = 'United States';
+                    break;
+                case 'CAN':
+                case 'CA':
+                    $data['country'] = 'Canada';
+                    break;
+                // Keep original value if not found
+                default:
+                    break;
+            }
+        }
+
         /*
          * Replace newlines with <br />, fix HTML "special" characters, and
          * strip leading empty lines and spaces.
@@ -909,8 +926,9 @@ class CandidatesUI extends UserInterface
                 'phoneWork'       => $this->getSanitisedInput('phoneWork', $_POST),
                 'address'         => $this->getSanitisedInput('address', $_POST),
                 'city'            => $this->getSanitisedInput('city', $_POST),
-                'state'           => $this->getSanitisedInput('state', $_POST),
+                'state'           => $this->getSanitisedInput('stateProv', $_POST),
                 'zip'             => $this->getSanitisedInput('zip', $_POST),
+                'country'         => $this->getSanitisedInput('country', $_POST),
                 'source'          => $this->getTrimmedInput('source', $_POST),
                 'keySkills'       => $this->getSanitisedInput('keySkills', $_POST),
                 'currentEmployer' => $this->getSanitisedInput('currentEmployer', $_POST),
@@ -1317,8 +1335,9 @@ class CandidatesUI extends UserInterface
         $email2          = $this->getSanitisedInput('email2', $_POST);
         $address         = $this->getSanitisedInput('address', $_POST);
         $city            = $this->getSanitisedInput('city', $_POST);
-        $state           = $this->getSanitisedInput('state', $_POST);
+        $state           = $this->getSanitisedInput('stateProv', $_POST);
         $zip             = $this->getSanitisedInput('zip', $_POST);
+        $country         = $this->getSanitisedInput('country', $_POST);
         $source          = $this->getSanitisedInput('source', $_POST);
         $keySkills       = $this->getSanitisedInput('keySkills', $_POST);
         $currentEmployer = $this->getSanitisedInput('currentEmployer', $_POST);
@@ -1360,6 +1379,7 @@ class CandidatesUI extends UserInterface
             $city,
             $state,
             $zip,
+            $country,
             $source,
             $keySkills,
             $dateAvailable,
@@ -2593,8 +2613,9 @@ class CandidatesUI extends UserInterface
         $email2          = $this->getTrimmedInput('email2', $_POST);
         $address         = $this->getTrimmedInput('address', $_POST);
         $city            = $this->getTrimmedInput('city', $_POST);
-        $state           = $this->getTrimmedInput('state', $_POST);
+        $state           = $this->getTrimmedInput('stateProv', $_POST);
         $zip             = $this->getTrimmedInput('zip', $_POST);
+        $country         = $this->getTrimmedInput('country', $_POST);
         $source          = $this->getTrimmedInput('source', $_POST);
         $keySkills       = $this->getTrimmedInput('keySkills', $_POST);
         $currentEmployer = $this->getTrimmedInput('currentEmployer', $_POST);
@@ -2644,6 +2665,7 @@ class CandidatesUI extends UserInterface
             $city,
             $state,
             $zip,
+            $country,
             $source,
             $keySkills,
             $dateAvailable,

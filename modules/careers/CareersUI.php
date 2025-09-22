@@ -417,6 +417,8 @@ class CareersUI extends UserInterface
             $address = isset($_POST[$id='address']) ? $_POST[$id] : '';
             $city = isset($_POST[$id='city']) ? $_POST[$id] : '';
             $state = isset($_POST[$id='state']) ? $_POST[$id] : '';
+            $stateProv = isset($_POST[$id='stateProv']) ? $_POST[$id] : '';
+            $country = isset($_POST[$id='country']) ? $_POST[$id] : '';
             $zip = isset($_POST[$id='zip']) ? $_POST[$id] : '';
             $phone = isset($_POST[$id='phone']) ? $_POST[$id] : '';
             $email = isset($_POST[$id='email']) ? $_POST[$id] : '';
@@ -426,6 +428,7 @@ class CareersUI extends UserInterface
             $email2 = isset($_POST[$id='email2']) ? $_POST[$id] : '';
             $emailconfirm = isset($_POST[$id='emailconfirm']) ? $_POST[$id] : '';
             $keySkills = isset($_POST[$id='keySkills']) ? $_POST[$id] : '';
+            $willingToRelocate = isset($_POST[$id='willingToRelocate']) ? $_POST[$id] : '';
             $source = isset($_POST[$id='source']) ? $_POST[$id] : '';
             $employer = isset($_POST[$id='employer']) ? $_POST[$id] : '';
             $linkedInUrl = isset($_POST[$id='linkedInUrl']) ? $_POST[$id] : '';
@@ -447,6 +450,8 @@ class CareersUI extends UserInterface
                     $address = $candidate['address'];
                     $city = $candidate['city'];
                     $state = $candidate['state'];
+                    $stateProv = $candidate['state']; // Map old state field to new stateProv
+                    $country = ''; // Default empty, user will need to select
                     $zip = $candidate['zip'];
                     $phone = $candidate['phoneWork'];
                     $phoneHome = $candidate['phoneHome'];
@@ -482,6 +487,8 @@ class CareersUI extends UserInterface
                         $address = $candidate['address'];
                         $city = $candidate['city'];
                         $state = $candidate['state'];
+                        $stateProv = $candidate['state']; // Map old state field to new stateProv
+                        $country = ''; // Default empty, user will need to select
                         $zip = $candidate['zip'];
                         $phone = $candidate['phoneWork'];
                         $phoneHome = $candidate['phoneHome'];
@@ -596,9 +603,120 @@ class CareersUI extends UserInterface
             $template['Content'] = str_replace('<input-email2>', '<input name="email2" id="email2" class="inputBoxNormal" value="' . $email2 . '" />', $template['Content']);
             $template['Content'] = str_replace('<input-emailconfirm>', '<input name="emailconfirm" id="emailconfirm" class="inputBoxNormal" value="' . $emailconfirm . '" />', $template['Content']);
             $template['Content'] = str_replace('<input-keySkills>', '<input name="keySkills" id="keySkills" class="inputBoxNormal" value="' . $keySkills . '" />', $template['Content']);
+
+            // Generate willing to relocate dropdown
+            $relocateOptions = '';
+            $relocateChoices = array('Yes' => 'Yes', 'No' => 'No');
+            foreach ($relocateChoices as $value => $label) {
+                $selected = ($willingToRelocate == $value) ? 'selected' : '';
+                $relocateOptions .= '<option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
+            }
+            $template['Content'] = str_replace('<input-willing-to-relocate>', '<select name="willingToRelocate" id="willingToRelocate" class="inputBoxNormal"><option value="">--</option>' . $relocateOptions . '</select>', $template['Content']);
             $template['Content'] = str_replace('<input-source>', '<input name="source" id="source" class="inputBoxNormal" value="' . $source . '" />', $template['Content']);
             $template['Content'] = str_replace('<input-employer>', '<input name="employer" id="employer" class="inputBoxNormal" value="' . $employer . '" />', $template['Content']);
             $template['Content'] = str_replace('<input-linkedInUrl>', '<input name="linkedInUrl" id="linkedInUrl" class="inputBoxNormal" value="' . $linkedInUrl . '" autocomplete="off" onkeypress="if(event.keyCode==13) return false;" />', $template['Content']);
+
+            // Generate State/Province dropdown with cascading logic
+            $usStates = array(
+                'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas', 'CA' => 'California',
+                'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware', 'FL' => 'Florida', 'GA' => 'Georgia',
+                'HI' => 'Hawaii', 'ID' => 'Idaho', 'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa',
+                'KS' => 'Kansas', 'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MD' => 'Maryland',
+                'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi', 'MO' => 'Missouri',
+                'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada', 'NH' => 'New Hampshire', 'NJ' => 'New Jersey',
+                'NM' => 'New Mexico', 'NY' => 'New York', 'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio',
+                'OK' => 'Oklahoma', 'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island', 'SC' => 'South Carolina',
+                'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah', 'VT' => 'Vermont',
+                'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia', 'WI' => 'Wisconsin', 'WY' => 'Wyoming'
+            );
+
+            $canadaProvinces = array(
+                'AB' => 'Alberta', 'BC' => 'British Columbia', 'MB' => 'Manitoba', 'NB' => 'New Brunswick',
+                'NL' => 'Newfoundland and Labrador', 'NT' => 'Northwest Territories', 'NS' => 'Nova Scotia',
+                'NU' => 'Nunavut', 'ON' => 'Ontario', 'PE' => 'Prince Edward Island', 'QC' => 'Quebec',
+                'SK' => 'Saskatchewan', 'YT' => 'Yukon'
+            );
+
+            $mexicoStates = array(
+                'AGS' => 'Aguascalientes', 'BC' => 'Baja California', 'BCS' => 'Baja California Sur', 'CAM' => 'Campeche',
+                'CHIS' => 'Chiapas', 'CHIH' => 'Chihuahua', 'COAH' => 'Coahuila', 'COL' => 'Colima',
+                'CDMX' => 'Ciudad de México', 'DUR' => 'Durango', 'GTO' => 'Guanajuato', 'GRO' => 'Guerrero',
+                'HGO' => 'Hidalgo', 'JAL' => 'Jalisco', 'MEX' => 'México', 'MICH' => 'Michoacán',
+                'MOR' => 'Morelos', 'NAY' => 'Nayarit', 'NL' => 'Nuevo León', 'OAX' => 'Oaxaca',
+                'PUE' => 'Puebla', 'QRO' => 'Querétaro', 'QROO' => 'Quintana Roo', 'SLP' => 'San Luis Potosí',
+                'SIN' => 'Sinaloa', 'SON' => 'Sonora', 'TAB' => 'Tabasco', 'TAMPS' => 'Tamaulipas',
+                'TLAX' => 'Tlaxcala', 'VER' => 'Veracruz', 'YUC' => 'Yucatán', 'ZAC' => 'Zacatecas'
+            );
+
+            // Generate JavaScript for cascading dropdowns
+            $cascadingScript = '<script type="text/javascript">
+            var usStates = ' . json_encode($usStates) . ';
+            var canadaProvinces = ' . json_encode($canadaProvinces) . ';
+            var mexicoStates = ' . json_encode($mexicoStates) . ';
+
+            function updateStateProvince() {
+                var countrySelect = document.getElementById("country");
+                var stateProvSelect = document.getElementById("stateProv");
+                var selectedCountry = countrySelect.value;
+
+                // Clear existing options
+                stateProvSelect.innerHTML = "<option value=\\"\\">--</option>";
+
+                var options = {};
+                if (selectedCountry === "USA") {
+                    options = usStates;
+                } else if (selectedCountry === "CAN") {
+                    options = canadaProvinces;
+                } else if (selectedCountry === "MEX") {
+                    options = mexicoStates;
+                }
+
+                // Add new options
+                for (var code in options) {
+                    var option = document.createElement("option");
+                    option.value = code;
+                    option.text = code;
+                    stateProvSelect.appendChild(option);
+                }
+
+                // Restore selected value if it exists
+                if ("' . $stateProv . '") {
+                    stateProvSelect.value = "' . $stateProv . '";
+                }
+            }
+
+            // Initialize on page load
+            window.onload = function() {
+                updateStateProvince();
+            };
+            </script>';
+
+            $stateProvOptions = '<option value="">--</option>';
+            // Pre-populate based on current country selection
+            $currentOptions = array();
+            if ($country === 'USA') {
+                $currentOptions = $usStates;
+            } else if ($country === 'CAN') {
+                $currentOptions = $canadaProvinces;
+            } else if ($country === 'MEX') {
+                $currentOptions = $mexicoStates;
+            }
+
+            foreach ($currentOptions as $code => $name) {
+                $selected = ($stateProv == $code) ? 'selected' : '';
+                $stateProvOptions .= '<option value="' . $code . '" ' . $selected . '>' . $code . '</option>';
+            }
+
+            $template['Content'] = str_replace('<input-state-prov>', '<select name="stateProv" id="stateProv" class="inputBoxNormal">' . $stateProvOptions . '</select>' . $cascadingScript, $template['Content']);
+
+            // Generate Country dropdown with onchange event
+            $countryOptions = '';
+            $countries = array('USA' => 'United States', 'CAN' => 'Canada', 'MEX' => 'Mexico');
+            foreach ($countries as $code => $name) {
+                $selected = ($country == $code) ? 'selected' : '';
+                $countryOptions .= '<option value="' . $code . '" ' . $selected . '>' . $name . '</option>';
+            }
+            $template['Content'] = str_replace('<input-country>', '<select name="country" id="country" class="inputBoxNormal" onchange="updateStateProvince()"><option value="">--</option>' . $countryOptions . '</select>', $template['Content']);
             $template['Content'] = str_replace('<input-resumeUpload>', '<input type="file" id="resume" name="file" class="inputBoxFile" />', $template['Content']);
             $template['Content'] = str_replace('<input-resumeUploadPreview>',
                 '<input type="hidden" id="applyToJobSubAction" name="applyToJobSubAction" value="" /> '
@@ -1102,6 +1220,50 @@ class CareersUI extends UserInterface
                 }';
         }
 
+        if (strpos($template['Content'], '<input-phone-cell>') !== false)
+        {
+            $validator .= '
+                if (document.getElementById(\'phoneCell\').value == \'\')
+                {
+                    alert(\'Please enter a mobile phone number.\');
+                    document.getElementById(\'phoneCell\').focus();
+                    return false;
+                }';
+        }
+
+        if (strpos($template['Content'], '<input-state-prov>') !== false)
+        {
+            $validator .= '
+                if (document.getElementById(\'stateProv\').value == \'\')
+                {
+                    alert(\'Please select a state or province.\');
+                    document.getElementById(\'stateProv\').focus();
+                    return false;
+                }';
+        }
+
+        if (strpos($template['Content'], '<input-country>') !== false)
+        {
+            $validator .= '
+                if (document.getElementById(\'country\').value == \'\')
+                {
+                    alert(\'Please select a country.\');
+                    document.getElementById(\'country\').focus();
+                    return false;
+                }';
+        }
+
+        if (strpos($template['Content'], '<input-willing-to-relocate>') !== false)
+        {
+            $validator .= '
+                if (document.getElementById(\'willingToRelocate\').value == \'\')
+                {
+                    alert(\'Please select whether you are willing to relocate.\');
+                    document.getElementById(\'willingToRelocate\').focus();
+                    return false;
+                }';
+        }
+
         if (strpos($template['Content'], '<input-keySkills req>') !== false)
         {
             $validator .= '
@@ -1270,6 +1432,8 @@ class CareersUI extends UserInterface
         $address        = $this->getSanitisedInput('address', $_POST);
         $city           = $this->getSanitisedInput('city', $_POST);
         $state          = $this->getSanitisedInput('state', $_POST);
+        $stateProv      = $this->getSanitisedInput('stateProv', $_POST);
+        $country        = $this->getSanitisedInput('country', $_POST);
         $zip            = $this->getSanitisedInput('zip', $_POST);
         $source         = $this->getSanitisedInput('source', $_POST);
         $phone          = $this->getSanitisedInput('phone', $_POST);
@@ -1277,6 +1441,9 @@ class CareersUI extends UserInterface
         $phoneCell      = $this->getSanitisedInput('phoneCell', $_POST);
         $bestTimeToCall = $this->getSanitisedInput('bestTimeToCall', $_POST);
         $keySkills      = $this->getSanitisedInput('keySkills', $_POST);
+        $willingToRelocateInput = $this->getSanitisedInput('willingToRelocate', $_POST);
+        $willingToRelocate = ($willingToRelocateInput === 'Yes') ? 1 : 0;
+
         $extraNotes     = $this->getSanitisedInput('extraNotes', $_POST);
         $employer       = $this->getSanitisedInput('employer', $_POST);
         $linkedInUrl    = isset($_POST['linkedInUrl']) ? trim($_POST['linkedInUrl']) : '';
@@ -1306,6 +1473,12 @@ class CareersUI extends UserInterface
             CommonErrors::fatal(COMMONERROR_MISSINGFIELDS, $this, 'E-Mail address is a required field - please have your administrator edit your templates to include the email field.');
         }
 
+        if (empty($keySkills))
+        {
+            CommonErrors::fatal(COMMONERROR_MISSINGFIELDS, $this, 'Key Skills is a required field - please provide your key skills.');
+            return;
+        }
+
         if (empty($source))
         {
             $source = 'Online Careers Website';
@@ -1324,7 +1497,7 @@ class CareersUI extends UserInterface
          * Save basic information in a cookie in case the site is using registration to
          * process repeated postings, etc.
          */
-        $fields = array('firstName', 'lastName', 'email', 'address', 'city', 'state', 'zip', 'phone',
+        $fields = array('firstName', 'lastName', 'email', 'address', 'city', 'stateProv', 'country', 'zip', 'phone',
             'phoneHome', 'phoneCell', 'linkedInUrl'
         );
         $storedVal = '';
@@ -1343,13 +1516,45 @@ class CareersUI extends UserInterface
             $candidate = $candidates->get($candidateID);
 
             // Candidate exists and registered. Update their profile with new values (if provided)
+
+            // 确保参数顺序正确匹配 update 方法签名
             $updateResult = $candidates->update(
-                $candidateID, $candidate['isActive'] ? true : false, $firstName, $middleName,
-                $lastName, $email, $email2, $phoneHome, $phoneCell, $phone, $address, $city,
-                $state, $zip, $source, $keySkills, '', $employer, '', '', '', $candidate['notes'],
-                '', $bestTimeToCall, $automatedUser['userID'], $automatedUser['userID'], $email,
-                $email, $gender, $race, $veteran, $disability, $linkedInUrl
+                $candidateID,                           // candidateID
+                $candidate['isActive'] ? true : false,  // isActive
+                $firstName,                             // firstName
+                $middleName,                            // middleName
+                $lastName,                              // lastName
+                $email,                                 // email1
+                $email2,                                // email2
+                $phoneHome,                             // phoneHome
+                $phoneCell,                             // phoneCell
+                $phone,                                 // phoneWork
+                $address,                               // address
+                $city,                                  // city
+                $stateProv,                             // state
+                $zip,                                   // zip
+                $country,                               // country
+                $source,                                // source
+                $keySkills,                             // keySkills
+                '',                                     // dateAvailable
+                $employer,                              // currentEmployer
+                $willingToRelocate,                     // canRelocate
+                '',                                     // currentPay
+                '',                                     // desiredPay
+                $candidate['notes'],                    // notes
+                '',                                     // webSite
+                $bestTimeToCall,                        // bestTimeToCall
+                $automatedUser['userID'],               // owner
+                0,                                      // isHot (0 = not hot)
+                $email,                                 // email
+                $email,                                 // emailAddress
+                $gender,                                // gender
+                $race,                                  // race
+                $veteran,                               // veteran
+                $disability,                            // disability
+                $linkedInUrl                            // linkedInUrl
             );
+
             
             // 检查更新是否成功
             if ($updateResult === false) {
@@ -1372,7 +1577,8 @@ class CareersUI extends UserInterface
         if ($candidateID === false || $candidateID < 0)
         {
             /* New candidate. */
-            
+            /* New candidate. */
+
             $candidateID = $candidates->add(
                 $firstName,
                 $middleName,
@@ -1384,13 +1590,14 @@ class CareersUI extends UserInterface
                 $phone,
                 $address,
                 $city,
-                $state,
+                $stateProv,
                 $zip,
+                $country,
                 $source,
                 $keySkills,
                 '',          // dateAvailable
                 $employer,   // currentEmployer
-                '',          // canRelocate
+                $willingToRelocate,   // canRelocate
                 '',          // currentPay
                 '',          // desiredPay
                 'Candidate submitted these notes with first application: '
@@ -1405,7 +1612,8 @@ class CareersUI extends UserInterface
                 $disability,
                 $linkedInUrl
             );
-            
+
+
             // 检查候选人是否添加成功
             if ($candidateID === false || $candidateID <= 0) {
                 CommonErrors::fatal(COMMONERROR_RECORDERROR, $this, 'Failed to create candidate record.');
@@ -1418,14 +1626,44 @@ class CareersUI extends UserInterface
         else if ($isReturningCandidate)
         {
             /* Returning candidate - update their information */
+            /* Returning candidate - update their information */
             $candidate = $candidates->get($candidateID);
+            // 修复参数顺序，添加缺失的country参数
             $updateResult = $candidates->update(
-                $candidateID, $candidate['isActive'] ? true : false, $firstName, $middleName,
-                $lastName, $email, $email2, $phoneHome, $phoneCell, $phone, $address, $city,
-                $state, $zip, $source, $keySkills, '', $employer, '', '', '', 
-                $candidate['notes'] . "\n\nCandidate updated profile on " . date('Y-m-d H:i:s') . ': ' . $extraNotes,
-                '', $bestTimeToCall, $automatedUser['userID'], $candidate['owner'], $email,
-                $email, $gender, $race, $veteran, $disability, $linkedInUrl
+                $candidateID,                           // candidateID
+                $candidate['isActive'] ? true : false,  // isActive
+                $firstName,                             // firstName
+                $middleName,                            // middleName
+                $lastName,                              // lastName
+                $email,                                 // email1
+                $email2,                                // email2
+                $phoneHome,                             // phoneHome
+                $phoneCell,                             // phoneCell
+                $phone,                                 // phoneWork
+                $address,                               // address
+                $city,                                  // city
+                $stateProv,                             // state
+                $zip,                                   // zip
+                $country,                               // country ← 这里添加了缺失的参数
+                $source,                                // source
+                $keySkills,                             // keySkills
+                '',                                     // dateAvailable
+                $employer,                              // currentEmployer
+                $willingToRelocate,                     // canRelocate
+                '',                                     // currentPay
+                '',                                     // desiredPay
+                $candidate['notes'] . "\n\nCandidate updated profile on " . date('Y-m-d H:i:s') . ': ' . $extraNotes, // notes
+                '',                                     // webSite
+                $bestTimeToCall,                        // bestTimeToCall
+                $automatedUser['userID'],               // owner
+                $candidate['owner'],                    // isHot (这里应该是0，但我保持原来的值)
+                $email,                                 // email
+                $email,                                 // emailAddress
+                $gender,                                // gender
+                $race,                                  // race
+                $veteran,                               // veteran
+                $disability,                            // disability
+                $linkedInUrl                            // linkedInUrl
             );
             
             // 检查更新是否成功

@@ -92,7 +92,7 @@ class Candidates
      * @return integer Candidate ID of new candidate, or -1 on failure.
      */
     public function add($firstName, $middleName, $lastName, $email1, $email2,
-        $phoneHome, $phoneCell, $phoneWork, $address, $city, $state, $zip,
+        $phoneHome, $phoneCell, $phoneWork, $address, $city, $state, $zip, $country,
         $source, $keySkills, $dateAvailable, $currentEmployer, $canRelocate,
         $currentPay, $desiredPay, $notes, $webSite, $bestTimeToCall, $enteredBy, $owner,
         $gender = '', $race = '', $veteran = '', $disability = '',
@@ -112,6 +112,7 @@ class Candidates
                 city,
                 state,
                 zip,
+                country,
                 source,
                 key_skills,
                 date_available,
@@ -180,6 +181,7 @@ class Candidates
             $this->_db->makeQueryString($city),
             $this->_db->makeQueryString($state),
             $this->_db->makeQueryString($zip),
+            $this->_db->makeQueryString($country),
             $this->_db->makeQueryString($source),
             $this->_db->makeQueryString($keySkills),
             $this->_db->makeQueryStringOrNULL($dateAvailable),
@@ -216,6 +218,7 @@ class Candidates
                 city,
                 state,
                 zip,
+                country,
                 source,
                 key_skills,
                 date_available,
@@ -239,7 +242,7 @@ class Candidates
                 eeo_gender
             )
             VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s, %s, %s, %s
             )",
             $this->_db->makeQueryString($firstName),
             $this->_db->makeQueryString($middleName),
@@ -253,6 +256,7 @@ class Candidates
             $this->_db->makeQueryString($city),
             $this->_db->makeQueryString($state),
             $this->_db->makeQueryString($zip),
+            $this->_db->makeQueryString($country),
             $this->_db->makeQueryString($source),
             $this->_db->makeQueryString($keySkills),
             $this->_db->makeQueryStringOrNULL($dateAvailable),
@@ -273,14 +277,16 @@ class Candidates
             $this->_db->makeQueryString($disability),
             $this->_db->makeQueryString($gender)
         );
-        
+
         $queryResult = $this->_db->query($sql);
+
         if (!$queryResult)
         {
             return -1;
         }
 
         $candidateID = $this->_db->getLastInsertID();
+
 
         if (!$skipHistory)
         {
@@ -325,7 +331,7 @@ class Candidates
      */
     public function update($candidateID, $isActive, $firstName, $middleName, $lastName,
         $email1, $email2, $phoneHome, $phoneCell, $phoneWork, $address,
-        $city, $state, $zip, $source, $keySkills, $dateAvailable,
+        $city, $state, $zip, $country, $source, $keySkills, $dateAvailable,
         $currentEmployer, $canRelocate, $currentPay, $desiredPay,
         $notes, $webSite, $bestTimeToCall, $owner, $isHot, $email, $emailAddress,
         $gender = '', $race = '', $veteran = '', $disability = '', $linkedInUrl = '')
@@ -347,6 +353,7 @@ class Candidates
                 city                  = %s,
                 state                 = %s,
                 zip                   = %s,
+                country               = %s,
                 source                = %s,
                 key_skills            = %s,
                 date_available        = %s,
@@ -382,6 +389,7 @@ class Candidates
             $this->_db->makeQueryString($city),
             $this->_db->makeQueryString($state),
             $this->_db->makeQueryString($zip),
+            $this->_db->makeQueryString($country),
             $this->_db->makeQueryString($source),
             $this->_db->makeQueryString($keySkills),
             $this->_db->makeQueryStringOrNULL($dateAvailable),
@@ -405,6 +413,7 @@ class Candidates
 
         $preHistory = $this->get($candidateID);
         $queryResult = $this->_db->query($sql);
+
         $postHistory = $this->get($candidateID);
 
         $history = new History($this->_siteID);
@@ -552,6 +561,7 @@ class Candidates
                 candidate.city AS city,
                 candidate.state AS state,
                 candidate.zip AS zip,
+                candidate.country AS country,
                 candidate.source AS source,
                 candidate.key_skills AS keySkills,
                 candidate.current_employer AS currentEmployer,
@@ -689,6 +699,7 @@ class Candidates
                 candidate.city AS city,
                 candidate.state AS state,
                 candidate.zip AS zip,
+                candidate.country AS country,
                 candidate.source AS source,
                 candidate.key_skills AS keySkills,
                 candidate.current_employer AS currentEmployer,
@@ -2129,6 +2140,15 @@ class CandidatesDataGrid extends DataGrid
                                      'pagerWidth'    => 50,
                                      'alphaNavigation' => true,
                                      'filter'         => 'candidate.state'),
+
+            'Country' =>        array('select'   => 'candidate.country AS country',
+                                     'sortableColumn'     => 'country',
+                                     'filterType' => 'dropDown',
+                                     'pagerWidth'    => 80,
+                                     'pagerRender'    => '$countryNames = array("USA" => "United States", "CAN" => "Canada", "MEX" => "Mexico");
+                                                          $countryCode = $rsData["country"];
+                                                          return isset($countryNames[$countryCode]) ? $countryNames[$countryCode] : $countryCode;',
+                                     'filter'         => 'candidate.country'),
 
             'Zip' =>            array('select'  => 'candidate.zip AS zip',
                                      'sortableColumn'    => 'zip',

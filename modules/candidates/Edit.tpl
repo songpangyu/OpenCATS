@@ -140,10 +140,26 @@
 
                     <tr>
                         <td class="tdVertical">
-                            <label id="stateLabel" for="state">State:</label>
+                            <label id="countryLabel" for="country">Country:</label>
                         </td>
                         <td class="tdData">
-                            <input type="text" class="inputbox" id="state" name="state" value="<?php $this->_($this->data['state']); ?>" style="width: 150px;" />
+                            <select id="country" name="country" class="inputbox" style="width: 150px;" onchange="updateStateProvince()">
+                                <option value="">Select Country</option>
+                                <option value="USA"<?php if ($this->data['country'] == 'USA'): ?> selected<?php endif; ?>>United States</option>
+                                <option value="Canada"<?php if ($this->data['country'] == 'Canada'): ?> selected<?php endif; ?>>Canada</option>
+                                <option value="Mexico"<?php if ($this->data['country'] == 'Mexico'): ?> selected<?php endif; ?>>Mexico</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="tdVertical">
+                            <label id="stateProvLabel" for="stateProv">State/Prov:</label>
+                        </td>
+                        <td class="tdData">
+                            <select id="stateProv" name="stateProv" class="inputbox" style="width: 150px;">
+                                <option value="">Select State/Province</option>
+                            </select>
                         </td>
                     </tr>
 
@@ -160,7 +176,7 @@
 
                     <tr>
                         <td class="tdVertical">
-                            <label id="canRelocateLabel" for="canRelocate">Best Time To Call:</label>
+                            <label id="bestTimeToCallLabel" for="bestTimeToCall">Best Time To Call:</label>
                         </td>
                         <td class="tdData">
                             <input type="text" class="inputbox" id="bestTimeToCall" name="bestTimeToCall" value="<?php $this->_($this->data['bestTimeToCall']); ?>" style="width: 150px;" />
@@ -329,10 +345,14 @@
 
                     <tr>
                         <td class="tdVertical">
-                            <label id="canRelocateLabel" for="canRelocate">Can Relocate:</label>
+                            <label id="canRelocateLabel" for="canRelocate">Can relocate:</label>
                         </td>
                         <td class="tdData">
-                            <input type="checkbox" id="canRelocate" name="canRelocate"<?php if ($this->data['canRelocate'] == 1): ?> checked<?php endif; ?> />
+                            <select id="canRelocate" name="canRelocate" class="inputbox" style="width: 150px;">
+                                <option value="">Select</option>
+                                <option value="Yes"<?php if ($this->data['canRelocate'] == 'Yes'): ?> selected<?php endif; ?>>Yes</option>
+                                <option value="No"<?php if ($this->data['canRelocate'] == 'No'): ?> selected<?php endif; ?>>No</option>
+                            </select>
                         </td>
                     </tr>
 
@@ -402,6 +422,79 @@
 
             <script type="text/javascript">
                 document.editCandidateForm.firstName.focus();
+
+                var usStates = {
+                    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+                    'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+                    'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+                    'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+                    'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+                    'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+                    'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+                    'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+                    'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+                    'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+                };
+
+                var canadaProvinces = {
+                    'AB': 'Alberta', 'BC': 'British Columbia', 'MB': 'Manitoba', 'NB': 'New Brunswick',
+                    'NL': 'Newfoundland and Labrador', 'NS': 'Nova Scotia', 'NT': 'Northwest Territories',
+                    'NU': 'Nunavut', 'ON': 'Ontario', 'PE': 'Prince Edward Island', 'QC': 'Quebec',
+                    'SK': 'Saskatchewan', 'YT': 'Yukon'
+                };
+
+                var mexicoStates = {
+                    'AGS': 'Aguascalientes', 'BC': 'Baja California', 'BCS': 'Baja California Sur', 'CAM': 'Campeche',
+                    'CHIS': 'Chiapas', 'CHIH': 'Chihuahua', 'COAH': 'Coahuila', 'COL': 'Colima',
+                    'CDMX': 'Ciudad de México', 'DUR': 'Durango', 'GTO': 'Guanajuato', 'GRO': 'Guerrero',
+                    'HGO': 'Hidalgo', 'JAL': 'Jalisco', 'MEX': 'México', 'MICH': 'Michoacán',
+                    'MOR': 'Morelos', 'NAY': 'Nayarit', 'NL': 'Nuevo León', 'OAX': 'Oaxaca',
+                    'PUE': 'Puebla', 'QRO': 'Querétaro', 'QROO': 'Quintana Roo', 'SLP': 'San Luis Potosí',
+                    'SIN': 'Sinaloa', 'SON': 'Sonora', 'TAB': 'Tabasco', 'TAMPS': 'Tamaulipas',
+                    'TLAX': 'Tlaxcala', 'VER': 'Veracruz', 'YUC': 'Yucatán', 'ZAC': 'Zacatecas'
+                };
+
+                function updateStateProvince() {
+                    var country = document.getElementById('country').value;
+                    var stateProvSelect = document.getElementById('stateProv');
+
+                    stateProvSelect.innerHTML = '<option value="">Select State/Province</option>';
+
+                    if (country === 'USA') {
+                        for (var code in usStates) {
+                            var option = document.createElement('option');
+                            option.value = code;
+                            option.text = usStates[code];
+                            if ('<?php echo($this->data['state'] ?? ''); ?>' === code) {
+                                option.selected = true;
+                            }
+                            stateProvSelect.appendChild(option);
+                        }
+                    } else if (country === 'Canada') {
+                        for (var code in canadaProvinces) {
+                            var option = document.createElement('option');
+                            option.value = code;
+                            option.text = canadaProvinces[code];
+                            if ('<?php echo($this->data['state'] ?? ''); ?>' === code) {
+                                option.selected = true;
+                            }
+                            stateProvSelect.appendChild(option);
+                        }
+                    } else if (country === 'Mexico') {
+                        for (var code in mexicoStates) {
+                            var option = document.createElement('option');
+                            option.value = code;
+                            option.text = mexicoStates[code];
+                            if ('<?php echo($this->data['state'] ?? ''); ?>' === code) {
+                                option.selected = true;
+                            }
+                            stateProvSelect.appendChild(option);
+                        }
+                    }
+                }
+
+                // Initialize on page load
+                updateStateProvince();
             </script>
         </div>
     </div>
